@@ -1,0 +1,13 @@
+@charset "UTF-8";
+/* CSS Document */
+@font-face{
+	font-family: 'Titillium';
+  	src:	url('../fonts/Titillium-Light.woff2') format('woff2'),
+		url('../fonts/Titillium-Light.woff') format('woff');	
+}
+
+@font-face{
+	font-family: 'TitilliumT';
+	src:	url("../fonts/Titillium-Thin.woff2") format('woff2'),
+		url("../fonts/Titillium-Thin.woff") format('woff');	
+}

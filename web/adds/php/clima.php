@@ -1,0 +1,92 @@
+<?php
+    date_default_timezone_set("Etc/GMT+6");
+
+	session_cache_limiter('nocache');
+	session_start();
+	
+	$t3 = md5($_POST['token'] . $_SESSION['t2']);
+
+	if ( $t3 == $_SESSION['token'] ){
+
+	    include_once("mysqlpdo.inc.php");
+	    include_once("cnx.inc.php");
+
+		$cnx = new MiSQL($u, $p, $bdg);
+		$cnx->cnxOn();
+
+        if ($_POST['h'] == "check"){
+			$r1 = $cnx->consulta("fecha, lu", "clima");
+            $actualizado = strtotime($r1[0]['fecha']." ".$r1[0]['lu']."+15 minutes");    
+			$ahora = time();
+			if ($actualizado >= $ahora){
+			    $res = $cnx->consulta("img, temp, pro, st, hr, uv", "clima", "id = :id", "", "", array(":id" => 1));
+                $r['temp'] = $res[0]['temp'];
+                $r['pro'] = $res[0]['pro'];
+                $r['img'] = $res[0]['img'];
+                $r['st'] = $res[0]['st'];
+                $r['hr'] = $res[0]['hr'];
+                $r['uv'] = $res[0]['uv'];
+                $s = "OK";
+            }else{
+                $s = "NA";
+            }
+        }else if ($_POST['h'] == "set"){
+			$cnx->actualizar("clima", "fecha = :fecha, lu = :lu, img = :img, temp = :temp, pro = :pro, st = :st, hr = :hr, uv = :uv ", "id = :id", array(":fecha" => $_POST['af'], ":lu" => $_POST['al'], ":img" => $_POST['ag'], ":temp" => $_POST['at'], ":pro" => $_POST['ap'], ":st" => $_POST['as'], ":hr" => $_POST['ah'], ":uv" => $_POST['au'], ":id" => 1));
+            $s = "OK";
+        }else{
+            $s = "NA";
+        }
+
+        $token1 = md5(uniqid(rand(), true));
+		$token2 = md5(uniqid(rand(), true));
+		$token3 = md5($token1 . $token2);
+		$_SESSION['token']= $token3;
+		$_SESSION['t2'] = $token2;
+		$r['token'] = $token1;
+        $r['s'] = $s;
+
+		$cnx->cnxOff();
+
+		echo json_encode($r);
+}else{
+?>
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>UMDI Sisal - UNAM</title>
+<link rel="stylesheet" href="adds/forbidden.css" />
+<script type="text/javascript" src="adds/js/jquery-3.7.1.min.js">;</script>
+<script type="text/javascript">
+	$(function(){
+		$("#g").show();
+		$("#w").show();
+	});
+</script>
+</head>
+<body>
+<div id="g"></div>
+<div id="w" style="height:240px; margin-top: -120px;">
+  	<div id="wd">
+  		<br />
+    	No tienes permiso para ver esta página
+  		<br /><br />
+    	<div id="im"><img src="imagenes/spinner.png" width="100" height="100"></div>
+        <img style="display:block; margin-top:-75px; margin-left:125px; margin-bottom:25px;" src="imagenes/stop.png" width="50" height="50" />  
+    	<br /> Serás direccionado a la página principal en 5 seg..
+  	</div>
+</div>       
+<script type="text/javascript">
+    var x;
+	x = setTimeout( acciona, 5000);
+
+	function acciona(){
+		clearTimeout(x); 
+		this.location = "index.php"		
+	}
+</script>	
+</body>
+</html>
+<?php
+	}
+?>
